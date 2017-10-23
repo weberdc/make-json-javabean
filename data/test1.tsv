@@ -1,0 +1,6 @@
+a	Long
+b	String
+c	Boolean
+d	Map<String,List<?>>
+e	FooBar
+default Boolean	isDefault
