@@ -23,6 +23,8 @@ public class Make {
     private boolean getters = false;
     @Parameter(names = {"-s", "--setters"}, description = "Generate setters (default: false)")
     private boolean setters = false;
+    @Parameter(names = {"-j", "--javadoc"}, description = "Generate javadoc (default: false)")
+    private boolean javadoc = false;
 
     @Parameter(names = {"-h", "-?", "--help"}, description = "Help (default: false)")
     private static boolean help = false;
@@ -74,22 +76,71 @@ public class Make {
                 }
             });
 
-        if (pkgName != null) {
-            type("package %s;", pkgName);
-            newline();
-        }
+        packageStatement(pkgName);
+        imports();
+        classDeclaration(className);
+        fields();
+        constructor(className);
+        gettersAndSetters();
+        closeClassDeclaration();
 
-        type("import com.fasterxml.jackson.annotation.JsonInclude;");
-        type("import com.fasterxml.jackson.annotation.JsonProperty;");
-        newline();
-        type("@JsonInclude(JsonInclude.Include.ALWAYS)");
-        type("public class %s {", className);
-        newline();
+        System.out.println(code.toString());
+    }
+
+    private void closeClassDeclaration() {
+        if (code.charAt(code.length() - 1) == '\n') {
+            // remove a blank line before the closing brace, if necessary
+            code.deleteCharAt(code.length() - 1);
+        }
+        type("}");
+    }
+
+    private void gettersAndSetters() {
         forEachField((jsonName, type, fieldName) -> {
-            type("    @JsonProperty(\"%s\")", jsonName);
-            type("    private %s%s %s;", (setters ? "" : "final "), type, fieldName);
+            if (getters) {
+                final String getMethodName = ! type.equalsIgnoreCase("boolean")
+                    ? "get" + CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName)
+                    : (fieldName.startsWith("is")
+                        ? fieldName
+                        : "is" + CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName));
+                if (javadoc) {
+                    type("    /**");
+                    type("     * Returns the <code>%s</code> property value from the {@link #%s} field.",
+                         jsonName, fieldName);
+                    type("     */");
+                }
+                type("    public %s %s() {", type, getMethodName);
+                type("        return %s;", fieldName);
+                type("    }");
+                newline();
+            }
+            if (setters) {
+                final String setMethodName = "set" + CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName);
+                if (javadoc) {
+                    type("    /**");
+                    type("     * Sets the <code>%s</code> property value to <code>%s</code>.", jsonName, fieldName);
+                    type("     *");
+                    type("     * @param %s The new value for the <code>%s</code> property.", fieldName, jsonName);
+                    type("     */");
+                }
+                type("    public void %s(final %s %s) {", setMethodName, type, fieldName);
+                type("        this.%s = %s;", fieldName, fieldName);
+                type("    }");
+                newline();
+            }
         });
-        newline();
+    }
+
+    private void constructor(String className) {
+        if (javadoc) {
+            type("    /**");
+            type("     * Constructor.");
+            type("     *");
+            forEachField((jsonName, type, fieldName) -> {
+                type("     * @param %s The <code>%s</code> property.", fieldName, jsonName);
+            });
+            type("     */");
+        }
         type("    public %s(", className);
         forEachField((jsonName, type, fieldName) -> {
             type("        @JsonProperty(\"%s\")", jsonName);
@@ -101,31 +152,40 @@ public class Make {
         });
         type("    }");
         newline();
-        if (getters) {
-            forEachField((jsonName, type, fieldName) -> {
-                final String getMethodName = ! type.equalsIgnoreCase("boolean")
-                    ? "get" + CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName)
-                    : (fieldName.startsWith("is")
-                        ? fieldName
-                        : "is" + CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName));
-                type("    public %s %s() {", type, getMethodName);
-                type("        return %s;", fieldName);
-                type("    }");
-                newline();
-            });
-        }
-        if (setters) {
-            forEachField((jsonName, type, fieldName) -> {
-                final String setMethodName = "set" + CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName);
-                type("    public void %s(final %s %s) {", setMethodName, type, fieldName);
-                type("        this.%s = %s;", fieldName, fieldName);
-                type("    }");
-                newline();
-            });
-        }
-        type("}");
+    }
 
-        System.out.println(code.toString());
+    private void fields() {
+        forEachField((jsonName, type, fieldName) -> {
+            type("    @JsonProperty(\"%s\")", jsonName);
+            type("    private %s%s %s;", (setters ? "" : "final "), type, fieldName);
+        });
+        newline();
+    }
+
+    private void classDeclaration(String className) {
+        if (javadoc) {
+            type("/**");
+            type(" * Description of %s JavaBean.", className);
+            type(" *");
+            type(" * @author %s", System.getProperty("user.name"));
+            type(" */");
+        }
+        type("@JsonInclude(JsonInclude.Include.ALWAYS)");
+        type("public class %s {", className);
+        newline();
+    }
+
+    private void imports() {
+        type("import com.fasterxml.jackson.annotation.JsonInclude;");
+        type("import com.fasterxml.jackson.annotation.JsonProperty;");
+        newline();
+    }
+
+    private void packageStatement(String pkgName) {
+        if (pkgName != null) {
+            type("package %s;", pkgName);
+            newline();
+        }
     }
 
     private void forEachField(Obj3Consumer<String> action) {
