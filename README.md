@@ -6,11 +6,13 @@ Last updated: **2017-10-24**
 
 Simple app to take a TSV of property names and types (and optional corresponding
 field names) and turn them into a JavaBean class, avoiding the mind-numbing task
-of creating the class yourself. This tool generates a JavaBean which is JSON-friendly.
+of creating the class yourself. This tool generates a JavaBean which is
+JSON-friendly (relies on [FasterXML](http://wiki.fasterxml.com/JacksonHome),
+which uses the Apache 2.0 licence).
 
 Requirements:
  + Java Development Kit 1.8
- + [FasterXML](http://wiki.fasterxml.com/JacksonHome) (Apache 2.0 licence)
+ + [Google Guava](https://github.com/google/guava) (Apache 2.0 licence)
  + [jcommander](http://jcommander.org) (Apache 2.0 licence)
 
 Built with [Gradle 4.2](http://gradle.org).
