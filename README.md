@@ -6,7 +6,7 @@ Last updated: **2017-10-24**
 
 Simple app to take a TSV of property names and types (and optional corresponding
 field names) and turn them into a JavaBean class, avoiding the mind-numbing task
-of creating the class yourself.
+of creating the class yourself. This tool generates a JavaBean which is JSON-friendly.
 
 Requirements:
  + Java Development Kit 1.8
