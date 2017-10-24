@@ -145,8 +145,12 @@ public class Make {
         type("    public %s(", className);
         forEachField((jsonName, type, fieldName) -> {
             type("        @JsonProperty(\"%s\")", jsonName);
-            type("        final %s %s;", type, fieldName);
+            type("        final %s %s,", type, fieldName);
         });
+        if (code.charAt(code.length() - 2) == ',') {
+            // remove a trailing comma before the newline, if necessary
+            code.deleteCharAt(code.length() - 2);
+        }
         type("    ) {");
         forEachField((jsonName, type, fieldName) -> {
             type("        this.%s = %s;", fieldName, fieldName);
