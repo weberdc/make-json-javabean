@@ -67,8 +67,9 @@ public class Make {
         final Path fieldsPath = Paths.get(new File(fieldsFile).toURI());
         Files.newBufferedReader(fieldsPath)
             .lines()
+            .map(l -> l.split("#")[0])
             .forEach(line -> {
-                String[] parts = line.split("\\s");
+                String[] parts = line.split("\\s+");
                 if (parts.length == 2) {
                     fields.put(parts[0], new Info(parts[1]));
                 } else if (parts.length > 2) {

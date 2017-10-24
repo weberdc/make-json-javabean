@@ -1,6 +1,6 @@
 a	Long
 b	String
-c	Boolean
-d	Map<String,List<?>>
+c	Boolean # ordinary
+d	Map<String,List<?>> # special
 e	FooBar
-default Boolean	isDefault
+default Boolean	isDefault # special too

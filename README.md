@@ -63,7 +63,9 @@ type for the property's value (this will be used in the generated source, so use
 a valid Java type), and, optionally, a field name to be used in place of the JSON
 property name, in case it clashes with a known Java keyword (e.g., Twitter user
 objects have a field `protected`, which clashes with the corresponding Java
-keyword). Output is written to `stdout`, so redirect it to a file as desired.
+keyword). These values are to be separated by whitespace (and therefore the
+values themselves can't contain whitespace). Output is written to `stdout`, so
+redirect it to a file as desired.
 
 It is likely that some further editing may be required, but it'll save you a lot
 of typing.
