@@ -23,7 +23,6 @@ repositories {
 }
 
 dependencies {
-    // This dependency is found on compile classpath of this component and consumers.
     compile 'com.google.guava:guava:22.0'
     // For command line argument parsing
     compile 'com.beust:jcommander:1.72'
